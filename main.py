@@ -35,6 +35,9 @@ def main():
             self.two_mins = 0
             self.repeat_state = False
 
+        async def run(self, music):
+            self.v_client.play(discord.FFmpegPCMAudio(source=music, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"), after=self.next)
+
         async def join(self, ctx):
             print("BBB")
             channel = ctx.message.author.voice.channel
@@ -64,8 +67,7 @@ def main():
                     streams = yt.streams.filter(only_audio=True)
                     filename = streams[0]
                     if not self.v_client.is_playing():
-                        self.v_client.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename.url,
-                                                                  before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"), after=self.next)
+                        await self.run(filename.url)
                         await self.ctx.send('**Now playing:** {}'.format(filename.title))
                         self.playing = filename
                     else:
@@ -91,15 +93,11 @@ def main():
 
         def next(self, err=None):
             if self.repeat_state:  # Check if repeat is enabled
-                self.v_client.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=self.playing.url,
-                                                          before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"),
-                                   after=self.next)
+                self.run(self.playing.url)
             elif len(self.music_queue) > 0:
                 filename = self.music_queue[0]
                 self.music_queue.pop(0)
-                self.v_client.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename.url,
-                                                          before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"),
-                                   after=self.next)
+                self.run(filename.url)
                 self.playing = filename
             else:
                 self.playing = None
