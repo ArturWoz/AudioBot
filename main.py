@@ -39,18 +39,13 @@ def main():
             self.v_client.play(discord.FFmpegPCMAudio(source=music, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"), after=self.next)
 
         async def join(self, ctx):
-            print("BBB")
             channel = ctx.message.author.voice.channel
-            print("BBB")
             self.ctx = ctx
-            print("BBB")
             await channel.connect()
-            print("BBB")
             try:
                 self.v_client = ctx.message.guild.voice_client
             except:
                 await self.ctx.send("ERROR")
-            print("BBB")
 
         async def play(self, url):
             if 'list' in url:
@@ -191,14 +186,9 @@ def main():
             await ctx.send("{} is not connected to a voice channel".format(ctx.message.author.name))
             return
         else:
-            print("AAAA")
             pl = Player()
-            print("AAAA")
             await pl.join(ctx)
-            print("AAAA")
             players.append(pl)
-            print("AAAA")
-            print(pl)
 
     @bot.command(name='play', help='To play song')
     async def play(ctx, url):
