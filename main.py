@@ -17,7 +17,6 @@ def url_from_yt_object(youtube):
     print(s2)
     return s2
 
-
 def main():
     intents = discord.Intents().all()
 
@@ -35,7 +34,7 @@ def main():
             self.two_mins = 0
             self.repeat_state = False
 
-        async def run(self, music):
+        def run(self, music):
             self.v_client.play(discord.FFmpegPCMAudio(source=music, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"), after=self.next)
 
         async def join(self, ctx):
@@ -62,7 +61,7 @@ def main():
                     streams = yt.streams.filter(only_audio=True)
                     filename = streams[0]
                     if not self.v_client.is_playing():
-                        await self.run(filename.url)
+                        self.run(filename.url)
                         await self.ctx.send('**Now playing:** {}'.format(filename.title))
                         self.playing = filename
                     else:
@@ -110,16 +109,24 @@ def main():
 
         async def queue(self):
             i = 0
-            output = '**Playing now:' + '.** [' + self.playing.title + "](" + self.playing.url + ") \n"
-            output = output + "In queue: \n"
+            outputs = [
+                '**Playing now:' + '.** [' + self.playing.title + "](" + self.playing.url + ") \n" + "In queue: \n"]
+            rows = []
             for f in self.music_queue:
-                output = output + '**' + str(i + 1) + '.** [' + f.title + "](" + f.url + ") \n"
+                rows.append('**' + str(i + 1) + '.** [' + f.title + "](" + f.url + ") \n")
                 i = i + 1
-            embed = discord.Embed()
-            embed.description = output
-            # embed.set_footer(text='Use %select. Will expire in 2 minutes.')
-            embed.title = 'Queue:'
-            await self.ctx.send(embed=embed)
+            i = 0
+            for r in rows:
+                if len(outputs[i])+len(r) < 4096:
+                    outputs[i] = outputs[i] + r
+                else:
+                    i = i+1
+                    outputs.append(r)
+            for o in outputs:
+                embed = discord.Embed()
+                embed.description = o
+                embed.title = 'Queue:'
+                await self.ctx.send(embed=embed)
 
         async def pause(self):
             if self.v_client.is_playing():
