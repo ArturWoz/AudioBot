@@ -4,6 +4,7 @@ from discord.ext import commands
 from pytube import Playlist
 import random
 import asyncio
+import os
 
 token_file = open("token.txt", "r")
 TOKEN = token_file.read()
@@ -16,6 +17,9 @@ def url_from_yt_object(youtube):
     s2 = 'https://www.youtube.com/watch?v=' + s[s.find(start) + len(start):s.rfind(end)]
     print(s2)
     return s2
+
+def file_safe(l):
+     return l.join(x for x in s if x.isalnum())
 
 def main():
     intents = discord.Intents().all()
@@ -35,7 +39,7 @@ def main():
             self.repeat_state = False
 
         def run(self, music):
-            self.v_client.play(discord.FFmpegPCMAudio(source=music, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"), after=self.next)
+            self.v_client.play(discord.FFmpegPCMAudio(source=music), after=self.next)
 
         async def join(self, ctx):
             channel = ctx.message.author.voice.channel
@@ -57,41 +61,47 @@ def main():
             url = url.split('&', 1)[0]
             try:
                 async with self.ctx.typing():
-                    yt = pytube.YouTube(url, use_oauth=True, allow_oauth_cache=True)
-                    streams = yt.streams.filter(only_audio=True)
-                    filename = streams[0]
+                    file = pytube.YouTube(url, use_oauth=True, allow_oauth_cache=True)\
+                        .streams.filter(only_audio=True)[0]
+                    #streams = yt.streams.filter(only_audio=True)
+                    #filename = streams[0]
+                    name = os.path.join("youtube", file.default_filename)
+                    file.download(output_path="youtube")
                     if not self.v_client.is_playing():
-                        self.run(filename.url)
-                        await self.ctx.send('**Now playing:** {}'.format(filename.title))
-                        self.playing = filename
+                        self.run(name)
+                        await self.ctx.send('**Now playing:** ' + name)
+                        self.playing = name
                     else:
-                        await self.ctx.send('**Added to queue:** {}'.format(filename.title))
-                        self.music_queue.append(filename)
+                        await self.ctx.send('**Added to queue:** ' + name)
+                        self.music_queue.append(name)
             except Exception as e:
                 string = str(e)
+                await self.ctx.send("**ERROR: **" + string)
                 print("The error is: ", string)
 
-        # async def local(self, filename):
-        #     if not self.v_client.is_playing():
-        #         try:
-        #             async with self.ctx.typing():
-        #                 self.v_client.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename),
-        #                                    after=self.next)
-        #             await self.ctx.send('**Now playing:** {}'.format(filename))
-        #             self.playing = filename
-        #         except:
-        #             await self.ctx.send("The bot is not connected to a voice channel.")
-        #     else:
-        #         await self.ctx.send('**Added to queue:** {}'.format(filename))
-        #         self.music_queue.append(filename)
+        async def local(self, name):
+            name = os.path.join("local", name)
+            try:
+                async with self.ctx.typing():
+                    if not self.v_client.is_playing():
+                        self.run(name)
+                        await self.ctx.send('**Now playing:** ' + name)
+                        self.playing = name
+                    else:
+                        await self.ctx.send('**Added to queue:** ' + name)
+                        self.music_queue.append(name)
+            except Exception as e:
+                string = str(e)
+                await self.ctx.send("**ERROR: **" + string)
+                print("The error is: ", string)
 
         def next(self, err=None):
             if self.repeat_state:  # Check if repeat is enabled
-                self.run(self.playing.url)
+                self.run(self.playing)
             elif len(self.music_queue) > 0:
                 filename = self.music_queue[0]
                 self.music_queue.pop(0)
-                self.run(filename.url)
+                self.run(filename)
                 self.playing = filename
             else:
                 self.playing = None
@@ -110,10 +120,10 @@ def main():
         async def queue(self):
             i = 0
             outputs = [
-                '**Playing now:' + '.** [' + self.playing.title + "](" + self.playing.url + ") \n" + "In queue: \n"]
+                '**Playing now: **' + self.playing + "\n" + "**In queue:** \n"]
             rows = []
             for f in self.music_queue:
-                rows.append('**' + str(i + 1) + '.** [' + f.title + "](" + f.url + ") \n")
+                rows.append('**' + str(i + 1) + '.** ' + f +"\n")
                 i = i + 1
             i = 0
             for r in rows:
@@ -211,12 +221,12 @@ def main():
             if ctx.guild == pl.ctx.guild:
                 await pl.repeat()
 
-    # @bot.command(name='local', help='To play song')
-    # async def local(ctx, url):
-    #     for pl in players:
-    #         if ctx.guild == pl.ctx.guild:
-    #             await pl.local(url)
-    #             print(len(pl.music_queue))
+    @bot.command(name='local', help='To play song')
+    async def local(ctx, url):
+         for pl in players:
+             if ctx.guild == pl.ctx.guild:
+                 await pl.local(url)
+                 print(len(pl.music_queue))
 
     @bot.command(name='search', help='To play song')
     async def search(ctx, *args):
