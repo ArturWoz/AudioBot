@@ -1,10 +1,12 @@
 import discord
-import pytube
+import pytubefix as pytube
 from discord.ext import commands
-from pytube import Playlist
+from pytubefix import Playlist
 import random
 import asyncio
 import os
+
+from spotify import spotify_list
 
 token_file = open("token.txt", "r")
 TOKEN = token_file.read()
@@ -51,6 +53,12 @@ def main():
                 await self.ctx.send("ERROR")
 
         async def play(self, url):
+            if 'spotify' in url:
+                songs = spotify_list(url)
+                for url in songs:
+                    print(url)
+                    await self.play(url)
+                return
             if 'list' in url:
                 if 'watch' not in url:
                     playlist = Playlist(url)
@@ -58,7 +66,6 @@ def main():
                         print(url)
                         await self.play(url)
                     return
-            url = url.split('&', 1)[0]
             try:
                 async with self.ctx.typing():
                     file = pytube.YouTube(url, use_oauth=True, allow_oauth_cache=True)\
@@ -78,7 +85,6 @@ def main():
                 string = str(e)
                 await self.ctx.send("**ERROR: **" + string)
                 print("The error is: ", string)
-
         async def local(self, name):
             name = os.path.join("local", name)
             try:

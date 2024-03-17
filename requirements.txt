@@ -1,3 +1,6 @@
 py-cord
-pytube
+pytubefix
 PyNaCl
+spotube
+spotipy
+beautifulsoup4
