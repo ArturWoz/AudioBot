@@ -1,6 +1,4 @@
 py-cord
 pytubefix
 PyNaCl
-spotube
 spotipy
-beautifulsoup4
