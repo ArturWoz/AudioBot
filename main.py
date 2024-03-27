@@ -28,20 +28,20 @@ def main():
         for pl in players:
             print(pl.ctx.guild)
             if ctx.guild == pl.ctx.guild:
-                await pl.play(url)
+                await pl.play(url, ctx)
                 print(len(pl.music_queue))
 
     @bot.command(name='repeat', help='Toggles repeat mode')
     async def repeat(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.repeat()
+                await pl.repeat(ctx)
 
     @bot.command(name='local', help='To play song')
     async def local(ctx, url):
          for pl in players:
              if ctx.guild == pl.ctx.guild:
-                 await pl.local(url)
+                 await pl.local(url, ctx)
                  print(len(pl.music_queue))
 
     @bot.command(name='search', help='To play song')
@@ -49,56 +49,56 @@ def main():
         arguments = ' '.join(args)
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.search(arguments)
+                await pl.search(arguments, ctx)
 
     @bot.command(name='pause', help='This command pauses the song')
     async def pause(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.pause()
+                await pl.pause(ctx)
 
     @bot.command(name='stop', help='This command pauses the song')
     async def stop(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.stop()
+                await pl.stop(ctx)
 
     @bot.command(name='skip', help='This command pauses the song')
     async def skip(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.skip()
+                await pl.skip(ctx)
 
     @bot.command(name='resume', help='Resumes the song')
     async def resume(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.resume()
+                await pl.resume(ctx)
 
     @bot.command(name='queue', help='Resumes the song')
     async def queue(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.queue()
+                await pl.queue(ctx)
 
     @bot.command(name='shuffle', help='Resumes the song')
     async def shuffle(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.shuffle()
+                await pl.shuffle(ctx)
 
     @bot.command(name='select', help='Resumes the song')
     async def select(ctx, no):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.select(no)
+                await pl.select(no, ctx)
 
     @bot.command(name='leave', help='To make the bot leave the voice channel')
     async def leave(ctx):
         print(players)
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.leave()
+                await pl.leave(ctx)
                 players.remove(pl)
         print(players)
 

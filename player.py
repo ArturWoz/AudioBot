@@ -39,7 +39,9 @@ class Player:
         except:
             await self.ctx.send("ERROR")
 
-    async def play(self, url):
+    async def play(self, url, ctx=None):
+        if ctx is not None:
+            self.ctx = ctx
         if 'spotify' in url:
             songs = spotify_list(url)
             for url in songs:
@@ -73,7 +75,8 @@ class Player:
             await self.ctx.send("**ERROR: **" + string)
             print("The error is: ", string)
 
-    async def local(self, name):
+    async def local(self, name, ctx):
+        self.ctx = ctx
         name = os.path.join("local", name)
         try:
             async with self.ctx.typing():
@@ -100,7 +103,8 @@ class Player:
         else:
             self.playing = None
 
-    async def repeat(self):
+    async def repeat(self, ctx):
+        self.ctx = ctx
         if not self.v_client.is_playing() and not self.v_client.is_paused():
             await self.ctx.send("No song is currently playing. Repeat mode cannot be enabled.")
             return
@@ -111,7 +115,8 @@ class Player:
         else:
             await self.ctx.send("Repeat mode disabled.")
 
-    async def queue(self):
+    async def queue(self, ctx):
+        self.ctx = ctx
         i = 0
         outputs = [
             '**Playing now: **' + self.playing + "\n" + "**In queue:** \n"]
@@ -132,42 +137,49 @@ class Player:
             embed.title = 'Queue:'
             await self.ctx.send(embed=embed)
 
-    async def pause(self):
+    async def pause(self, ctx):
+        self.ctx = ctx
         if self.v_client.is_playing():
             await self.v_client.pause()
         else:
             await self.ctx.send("The bot is not playing anything at the moment.")
 
-    async def resume(self):
+    async def resume(self, ctx):
+        self.ctx = ctx
         if self.v_client.is_paused():
             await self.v_client.resume()
         else:
             await self.ctx.send("The bot was not paused.")
 
-    async def stop(self):
+    async def stop(self, ctx):
+        self.ctx = ctx
         self.music_queue = []
         if self.v_client.is_playing():
             self.v_client.stop()
         else:
             await self.ctx.send("The bot is not playing anything at the moment.")
 
-    async def skip(self):
+    async def skip(self, ctx):
+        self.ctx = ctx
         if self.v_client.is_playing():
             self.v_client.stop()
         else:
             await self.ctx.send("The bot is not playing anything at the moment.")
 
-    async def leave(self):
+    async def leave(self, ctx):
+        self.ctx = ctx
         if self.v_client.is_connected():
             await self.v_client.disconnect()
         else:
             await self.ctx.send("The bot is not connected.")
 
-    async def shuffle(self):
+    async def shuffle(self, ctx):
+        self.ctx = ctx
         random.shuffle(self.music_queue)
         await self.ctx.send("Shuffled queue!")
 
-    async def search(self, query):
+    async def search(self, query, ctx):
+        self.ctx = ctx
         s = pytube.Search(query)
         self.search_results = s
         output = ''
@@ -186,7 +198,8 @@ class Player:
         if self.two_mins == 0:
             self.search_results = None
 
-    async def select(self, no):
+    async def select(self, no, ctx):
+        self.ctx = ctx
         no = int(no) - 1
         url = url_from_yt_object(self.search_results.results[no])
         await self.play(url)
