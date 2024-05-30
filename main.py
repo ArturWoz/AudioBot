@@ -7,13 +7,12 @@ from player import *
 
 
 def main():
-    with open("config.json", encoding='utf-8-sig') as json_file:
-        APIs = json.load(json_file)
-    TOKEN = APIs["discord"]["token"]
-    admin = json.load(open("admin.json", encoding='utf-8-sig'))
+    config = json.load(open("config.json", encoding='utf-8-sig'))
+    TOKEN = config["discord"]["token"]
+    admin = config["admin"]
 
     intents = discord.Intents().all()
-    bot = commands.Bot(command_prefix='%', description="This is a test bot", intents=intents)
+    bot = commands.Bot(command_prefix=config["prefix"], description="This is a test bot", intents=intents)
     players = []
 
     @bot.command(name='join', help='Tells the bot to join the voice channel')
