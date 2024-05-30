@@ -1,13 +1,16 @@
 import discord
 from discord.ext import commands
 import json
+import sys
 
 from player import *
+
 
 def main():
     with open("config.json", encoding='utf-8-sig') as json_file:
         APIs = json.load(json_file)
     TOKEN = APIs["discord"]["token"]
+    admin = json.load(open("admin.json", encoding='utf-8-sig'))
 
     intents = discord.Intents().all()
     bot = commands.Bot(command_prefix='%', description="This is a test bot", intents=intents)
@@ -28,20 +31,20 @@ def main():
         for pl in players:
             print(pl.ctx.guild)
             if ctx.guild == pl.ctx.guild:
-                await pl.play(url, ctx)
+                await pl.play(url)
                 print(len(pl.music_queue))
 
     @bot.command(name='repeat', help='Toggles repeat mode')
     async def repeat(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.repeat(ctx)
+                await pl.repeat()
 
     @bot.command(name='local', help='To play song')
     async def local(ctx, url):
          for pl in players:
              if ctx.guild == pl.ctx.guild:
-                 await pl.local(url, ctx)
+                 await pl.local(url)
                  print(len(pl.music_queue))
 
     @bot.command(name='search', help='To play song')
@@ -49,58 +52,64 @@ def main():
         arguments = ' '.join(args)
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.search(arguments, ctx)
+                await pl.search(arguments)
 
     @bot.command(name='pause', help='This command pauses the song')
     async def pause(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.pause(ctx)
+                await pl.pause()
 
     @bot.command(name='stop', help='This command pauses the song')
     async def stop(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.stop(ctx)
+                await pl.stop()
 
     @bot.command(name='skip', help='This command pauses the song')
     async def skip(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.skip(ctx)
+                await pl.skip()
 
     @bot.command(name='resume', help='Resumes the song')
     async def resume(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.resume(ctx)
+                await pl.resume()
 
     @bot.command(name='queue', help='Resumes the song')
     async def queue(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.queue(ctx)
+                await pl.queue()
 
     @bot.command(name='shuffle', help='Resumes the song')
     async def shuffle(ctx):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.shuffle(ctx)
+                await pl.shuffle()
 
     @bot.command(name='select', help='Resumes the song')
     async def select(ctx, no):
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.select(no, ctx)
+                await pl.select(no)
 
     @bot.command(name='leave', help='To make the bot leave the voice channel')
     async def leave(ctx):
         print(players)
         for pl in players:
             if ctx.guild == pl.ctx.guild:
-                await pl.leave(ctx)
+                await pl.leave()
                 players.remove(pl)
         print(players)
+
+    @bot.command(name='shutdown', help='Shutdown bot by admin.')
+    async def shutdown(ctx):
+        if str(ctx.message.author.id) in admin:
+            await bot.close()
+            sys.exit("Shutdown by admin")
 
     @bot.event
     async def on_ready():
@@ -108,6 +117,12 @@ def main():
 
     @bot.event
     async def on_voice_state_update(member, before, after):
+        if member.id == bot.application_id:
+            for pl in players:
+                if member.guild == pl.ctx.guild:
+                    await pl.leave()
+                    players.remove(pl)
+
         if after.channel is None:
             members = before.channel.members
             for person in members:

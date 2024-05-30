@@ -1,6 +1,9 @@
-
+*.pyc
 *.xml
 *.exe
 *.iml
 *.mp4
+.cache
+run.sh
 config.json
+admin.json
