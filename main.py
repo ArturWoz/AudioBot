@@ -114,27 +114,27 @@ def main():
     async def on_ready():
         print(f'We have logged in as {bot.user}')
 
-    @bot.event
-    async def on_voice_state_update(member, before, after):
-        if member.id == bot.application_id:
-            for pl in players:
-                if member.guild == pl.ctx.guild:
-                    await pl.leave()
-                    players.remove(pl)
-
-        if after.channel is None:
-            members = before.channel.members
-            for person in members:
-                if not person.bot:
-                    return
-            for person in members:
-                await person.edit(voice_channel=None)
-                print(players)
-                for pl in players:
-                    if member.guild == pl.ctx.guild:
-                        await pl.leave()
-                        players.remove(pl)
-                print(players)
+    # @bot.event
+    # async def on_voice_state_update(member, before, after):
+    #     if member.id == bot.application_id:
+    #         for pl in players:
+    #             if member.guild == pl.ctx.guild:
+    #                 await pl.leave()
+    #                 players.remove(pl)
+    #
+    #     if after.channel is None:
+    #         members = before.channel.members
+    #         for person in members:
+    #             if not person.bot:
+    #                 return
+    #         for person in members:
+    #             await person.edit(voice_channel=None)
+    #             print(players)
+    #             for pl in players:
+    #                 if member.guild == pl.ctx.guild:
+    #                     await pl.leave()
+    #                     players.remove(pl)
+    #             print(players)
 
     # @bot.event
     # async def on_message(message):
