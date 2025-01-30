@@ -46,7 +46,7 @@ class Player:
         print("Searching songs...")
         for i in tracks:
             print(i)
-            s = pytube.Search(i)
+            s = pytube.Search(i, "WEB") #, use_oauth=True, allow_oauth_cache=True)
             try:
                 await self.youtube(s.videos[0])
             except Exception as e:
@@ -87,7 +87,7 @@ class Player:
                 return
         try:
             async with self.ctx.typing():
-                file = pytube.YouTube(url, use_oauth=True, allow_oauth_cache=True)
+                file = pytube.YouTube(url, "WEB") #, use_oauth=True, allow_oauth_cache=True)
                 await self.youtube(file)
         except Exception as e:
             string = str(e)
@@ -189,7 +189,7 @@ class Player:
         await self.ctx.send("Shuffled queue!")
 
     async def search(self, query):
-        s = pytube.Search(query)
+        s = pytube.Search(query, "WEB")#, use_oauth=True, allow_oauth_cache=True)
         self.search_results = s
         output = ''
         for i in range(10):
