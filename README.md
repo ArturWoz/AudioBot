@@ -32,7 +32,7 @@ Bot is run as a regular Python project. File requirements.txt provides Python de
 ## Plugin design
 
 
-Plugins are stored in plugins folder. They are loaded automatically. Each plugin implements the following structure:
+Plugins are stored in plugins folder. They are loaded automatically. Downloading files is recommended, as direct links to files on a server can expire before playing, if the song is in queue. Each plugin implements the following structure:
 
     class Plugin(plugins.Base):
 
