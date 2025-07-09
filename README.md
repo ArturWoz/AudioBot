@@ -32,5 +32,15 @@ Bot is run as a regular Python project. File requirements.txt provides Python de
 ## Plugin design
 
 
-Plugins are stored in plugins folder. They are loaded automatically.
+Plugins are stored in plugins folder. They are loaded automatically. Each plugin implements the following structure:
 
+    class Plugin(plugins.Base):
+
+        def play(self, path: str) -> str:
+            #Argument is a url/path. Returns path to downloaded file.
+    
+        def playlist(self, path: str) -> list[str]:
+            #Argument is a playlist url/path. Returns list of song urls/paths.
+    
+        def search(self, query: str) -> list[dict[str, str]]:
+            #Argument is a search query. Returns list of dicts containing urls/paths and names in the following format: {"url": url, "title": title}

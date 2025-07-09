@@ -6,9 +6,6 @@ import glob
 
 class Local(plugins.Base):
 
-    def __init__(self):
-        pass
-
     def play(self, path: str) -> str:
         name = join("local", path)
         return name
