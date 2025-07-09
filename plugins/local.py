@@ -12,7 +12,7 @@ class Local(plugins.Base):
 
     def playlist(self, name: str) -> list[str]:
         path = join("local", name)
-        return [f for f in listdir(path) if isfile(join(path, f))]
+        return [name + '/' + f for f in listdir(path) if isfile(join(path, f))]
 
     def search(self, name: str) -> list[dict[str, str]]:
         s = glob.glob('local/*' + name + '*')
