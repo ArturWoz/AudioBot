@@ -1,20 +1,7 @@
 import discord
-import pytubefix as pytube
-from pytubefix import Playlist
 import random
 import asyncio
-import os
-
-from spotify import *
-
-
-def url_from_yt_object(youtube):
-    start = 'videoId='
-    end = '>'
-    s = str(youtube)
-    s2 = 'https://www.youtube.com/watch?v=' + s[s.find(start) + len(start):s.rfind(end)]
-    print(s2)
-    return s2
+from plugins import Base
 
 
 class Player:
@@ -24,6 +11,7 @@ class Player:
         self.ctx = None
         self.playing = None
         self.search_results = None
+        self.search_plugin = None
         self.two_mins = 0
         self.repeat_state = False
 
@@ -41,61 +29,9 @@ class Player:
             await self.ctx.send("**ERROR: **" + string)
             print("The error is: ", string)
 
-    async def spotify(self, url):
-        tracks = getTracks(url)
-        print("Searching songs...")
-        for i in tracks:
-            print(i)
-            s = pytube.Search(i, "WEB") #, use_oauth=True, allow_oauth_cache=True)
-            try:
-                await self.youtube(s.videos[0])
-            except Exception as e:
-                string = str(e)
-                await self.ctx.send("**ERROR: **" + string)
-                print("The error is: ", string)
-            # await asyncio.sleep(20)
-        await self.ctx.send('Added Spotify playlist to queue')
-        return
-
-    async def youtube(self, video):
-        try:
-            file = video.streams.filter(only_audio=True)[0]
-            name = os.path.join("youtube", file.default_filename)
-            file.download(output_path="youtube")
-            if not self.v_client.is_playing():
-                self.run(name)
-                await self.ctx.send('**Now playing:** ' + name)
-                self.playing = name
-            else:
-                await self.ctx.send('**Added to queue:** ' + name)
-                self.music_queue.append(name)
-        except Exception as e:
-            string = str(e)
-            await self.ctx.send("**ERROR: **" + string)
-            print("The error is: ", string)
-
-    async def play(self, url):
-        if 'spotify' in url:
-            await self.spotify(url)
-            return
-        if 'list' in url:
-            if 'watch' not in url:
-                playlist = Playlist(url)
-                for url in playlist.videos:
-                    await self.youtube(url)
-                await self.ctx.send('Added Youtube playlist to queue')
-                return
-        try:
-            async with self.ctx.typing():
-                file = pytube.YouTube(url, "WEB") #, use_oauth=True, allow_oauth_cache=True)
-                await self.youtube(file)
-        except Exception as e:
-            string = str(e)
-            await self.ctx.send("**ERROR: **" + string)
-            print("The error is: ", string)
-
-    async def local(self, name):
-        name = os.path.join("local", name)
+    async def play(self, plugin, path):
+        inst = Base.plugins[plugin]()
+        name = inst.play(path)
         try:
             async with self.ctx.typing():
                 if not self.v_client.is_playing():
@@ -109,6 +45,12 @@ class Player:
             string = str(e)
             await self.ctx.send("**ERROR: **" + string)
             print("The error is: ", string)
+
+    async def list(self, plugin, path):
+        inst = Base.plugins[plugin]()
+        tracks = inst.playlist(path)
+        for track in tracks:
+            await self.play(plugin, track)
 
     def next(self, err=None):
         if self.repeat_state:  # Check if repeat is enabled
@@ -153,6 +95,37 @@ class Player:
             embed.title = 'Queue:'
             await self.ctx.send(embed=embed)
 
+    async def search(self, plugin, query):
+        inst = Base.plugins[plugin]()
+
+        self.search_plugin = plugin
+        s = inst.search(query)
+        self.search_results = s
+
+        output = ''
+        for i in range(len(s)):
+            url = s[i]["url"]
+            title = s[i]["title"]
+            output = output + '**' + str(i + 1) + '.** [' + title + "](" + url + ") \n"
+
+        embed = discord.Embed()
+        embed.description = output
+        embed.set_footer(text='Use %select. Will expire in 2 minutes.')
+        embed.title = 'Search results:'
+        await self.ctx.send(embed=embed)
+
+        self.two_mins = self.two_mins + 1
+        await asyncio.sleep(120)
+        self.two_mins = self.two_mins - 1
+        if self.two_mins == 0:
+            self.search_results = None
+            self.search_plugin = None
+
+    async def select(self, no):
+        no = int(no) - 1
+        url = self.search_results[no]["url"]
+        await self.play(self.search_plugin, url)
+
     async def pause(self):
         if self.v_client.is_playing():
             await self.v_client.pause()
@@ -187,27 +160,3 @@ class Player:
     async def shuffle(self):
         random.shuffle(self.music_queue)
         await self.ctx.send("Shuffled queue!")
-
-    async def search(self, query):
-        s = pytube.Search(query, "WEB")#, use_oauth=True, allow_oauth_cache=True)
-        self.search_results = s
-        output = ''
-        for i in range(10):
-            url = url_from_yt_object(s.videos[i])
-            title = s.videos[i].title
-            output = output + '**' + str(i + 1) + '.** [' + title + "](" + url + ") \n"
-        embed = discord.Embed()
-        embed.description = output
-        embed.set_footer(text='Use %select. Will expire in 2 minutes.')
-        embed.title = 'Search results:'
-        await self.ctx.send(embed=embed)
-        self.two_mins = self.two_mins + 1
-        await asyncio.sleep(120)
-        self.two_mins = self.two_mins - 1
-        if self.two_mins == 0:
-            self.search_results = None
-
-    async def select(self, no):
-        no = int(no) - 1
-        url = url_from_yt_object(self.search_results.videos[no])
-        await self.play(url)

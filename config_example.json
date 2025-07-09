@@ -1,0 +1,8 @@
+{
+    "discord":
+    {
+        "token": "your-dc-token"
+    },
+    "admin": "admin-dc-id",
+    "prefix": "%"
+}

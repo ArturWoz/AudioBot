@@ -8,3 +8,7 @@ run.sh
 config.json
 admin.json
 *.m4a
+*.mp3
+plugins/pluginA.py
+plugins/pluginB.py
+plugins/pluginA.json
