@@ -10,10 +10,10 @@ This is a simple Discord bot for playing music. Sources are added by plugin syst
 * join - Join a voice channel
 * leave - Join a voice channel
 * shutdown - Shutdown the bot if the user is bot admin (listed in config file)
-* play <plugin> <url> - Play a song
-* list <plugin> <url> - Play a playlist
-* search <plugin> <url> - Search for a song
-* select <no> - Select from search command
+* play (plugin) (url) - Play a song
+* list (plugin) (url) - Play a playlist
+* search (plugin) (url) - Search for a song
+* select (no) - Select from search command
 * queue - Show the song queue
 * shuffle - Shuffle the song queue
 * repeat - Toggle repeat mode
@@ -36,11 +36,11 @@ Plugins are stored in plugins folder. They are loaded automatically. Each plugin
 
     class Plugin(plugins.Base):
 
-        def play(self, path: str) -> str:
+        def play(self, path: str) -) str:
             #Argument is a url/path. Returns path to downloaded file.
     
-        def playlist(self, path: str) -> list[str]:
+        def playlist(self, path: str) -) list[str]:
             #Argument is a playlist url/path. Returns list of song urls/paths.
     
-        def search(self, query: str) -> list[dict[str, str]]:
+        def search(self, query: str) -) list[dict[str, str]]:
             #Argument is a search query. Returns list of dicts containing urls/paths and names in the following format: {"url": url, "title": title}
