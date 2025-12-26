@@ -16,7 +16,7 @@ def main():
 
     intents = discord.Intents().all()
     bot = commands.Bot(command_prefix=config["prefix"], description="Plugin-based Discord music bot", intents=intents)
-    players = []
+    players = {}
 
     @bot.command(name='join', help='Tells the bot to join the voice channel')
     async def join(ctx):
@@ -26,86 +26,58 @@ def main():
         else:
             pl = Player()
             await pl.join(ctx)
-            players.append(pl)
+            players[ctx.guild] = pl
 
     @bot.command(name='play', help='To play song')
     async def play(ctx, plugin, url):
-        for pl in players:
-            print(pl.ctx.guild)
-            if ctx.guild == pl.ctx.guild:
-                await pl.play(plugin, url)
-                print(len(pl.music_queue))
+        await players[ctx.guild].play(plugin, url)
 
     @bot.command(name='list', help='To play a playlist')
     async def playlist(ctx, plugin, url):
-        for pl in players:
-            print(pl.ctx.guild)
-            if ctx.guild == pl.ctx.guild:
-                await pl.list(plugin, url)
-                print(len(pl.music_queue))
+        await players[ctx.guild].list(plugin, url)
 
     @bot.command(name='repeat', help='Toggles repeat mode')
     async def repeat(ctx):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.repeat()
+        await players[ctx.guild].repeat()
 
     @bot.command(name='search', help='To search for song')
     async def search(ctx, plugin, *args):
         arguments = ' '.join(args)
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.search(plugin, arguments)
+        await players[ctx.guild].search(plugin, arguments)
 
     @bot.command(name='pause', help='To pause the song')
     async def pause(ctx):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.pause()
+        await players[ctx.guild].pause()
 
     @bot.command(name='stop', help='To stop the song')
     async def stop(ctx):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.stop()
+        await players[ctx.guild].stop()
 
     @bot.command(name='skip', help='To skip the song')
     async def skip(ctx):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.skip()
+        await players[ctx.guild].skip()
 
     @bot.command(name='resume', help='To resume the song')
     async def resume(ctx):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.resume()
+        await players[ctx.guild].resume()
 
     @bot.command(name='queue', help='To show the song queue')
     async def queue(ctx):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.queue()
+        await players[ctx.guild].queue()
 
     @bot.command(name='shuffle', help='To shuffle the song queue')
     async def shuffle(ctx):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.shuffle()
+        await players[ctx.guild].shuffle()
 
-    @bot.command(name='select', help='To resume playing')
+    @bot.command(name='select', help='To select from search results')
     async def select(ctx, no):
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.select(no)
+        await players[ctx.guild].select(no)
 
     @bot.command(name='leave', help='To make the bot leave the voice channel')
     async def leave(ctx):
         print(players)
-        for pl in players:
-            if ctx.guild == pl.ctx.guild:
-                await pl.leave()
-                players.remove(pl)
+        await players[ctx.guild].leave()
+        players.pop(ctx.guild)
         print(players)
 
     @bot.command(name='shutdown', help='Shutdown bot by admin.')
