@@ -27,6 +27,40 @@ media_list_query = '''
     }
 '''
 
+user_query = '''
+query User($name: String, $sort: [UserStatisticsSort], $limit: Int) {
+  User(name: $name) {
+    avatar {
+      medium
+    }
+    bannerImage
+    createdAt
+    statistics {
+      anime {
+        minutesWatched
+        meanScore
+        count
+        genres(sort: $sort, limit: $limit) {
+          count
+          genre
+          meanScore
+        }
+      }
+      manga {
+        count
+        chaptersRead
+        meanScore
+        genres(sort: $sort, limit: $limit) {
+          count
+          genre
+          meanScore
+        }
+      }
+    }
+  }
+}
+'''
+
 
 def get_media_id(title, media_type):
     response = requests.post(url, json={'query': media_query, 'variables': {'search': title, 'type': media_type}})
@@ -106,3 +140,17 @@ def find_watchers(target_users, target_media, media_type):
                 for entry in results:
                     out.append(entry['user']['name'])
     return out, title
+
+def fetch_user(username):
+    variables = {
+          "name": "TsarOfBulgaria",
+          "sort": "COUNT_DESC",
+          "limit": 3
+    }
+    response = requests.post(url, json={'query': user_query, 'variables': variables})
+    if response.status_code != 200:
+        print(f"API Error: {response.text}")
+        return []
+    data = response.json()
+    # print(data)
+    return data.get('data').get('User')

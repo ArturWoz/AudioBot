@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
-
 import json
-import sys
 
 import music_cog
 import anime_cog
