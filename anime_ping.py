@@ -3,7 +3,7 @@ import json
 
 url = 'https://graphql.anilist.co'
 
-media_query = '''
+media_ping_query = '''
     query ($search: String, $type: MediaType) {
       Media(search: $search, type: $type) {
         id
@@ -61,9 +61,46 @@ query User($name: String, $sort: [UserStatisticsSort], $limit: Int) {
 }
 '''
 
+media_query = '''
+query Media($search: String, $type: MediaType) {
+  Media(search: $search, type: $type) {
+    coverImage {
+      large
+      color
+    }
+    siteUrl
+    title {
+      english
+      native
+      romaji
+    }
+    description(asHtml: false)
+    duration
+    episodes
+    genres
+    meanScore
+    season
+    seasonYear
+    status
+    volumes
+    chapters
+    startDate {
+      day
+      month
+      year
+    }
+    endDate {
+      day
+      month
+      year
+    }
+  }
+}
+'''
+
 
 def get_media_id(title, media_type):
-    response = requests.post(url, json={'query': media_query, 'variables': {'search': title, 'type': media_type}})
+    response = requests.post(url, json={'query': media_ping_query, 'variables': {'search': title, 'type': media_type}})
     if response.status_code != 200: return None, None
     data = response.json()
     if 'errors' in data: return None, None
@@ -143,7 +180,7 @@ def find_watchers(target_users, target_media, media_type):
 
 def fetch_user(username):
     variables = {
-          "name": "TsarOfBulgaria",
+          "name": username,
           "sort": "COUNT_DESC",
           "limit": 3
     }
@@ -154,3 +191,16 @@ def fetch_user(username):
     data = response.json()
     # print(data)
     return data.get('data').get('User')
+
+def get_media(name, mediatype):
+    variables = {
+          "search": name,
+          "type": mediatype,
+    }
+    response = requests.post(url, json={'query': media_query, 'variables': variables})
+    if response.status_code != 200:
+        print(f"API Error: {response.text}")
+        return []
+    data = response.json()
+    # print(data)
+    return data.get('data').get('Media')
