@@ -62,25 +62,25 @@ class Anime(commands.Cog):
     @commands.command(name='aniping', help='Ping users who watched an anime')
     async def aniping(self, ctx, *args):
         name = ' '.join(args)
-        watchers, title = find_watchers(self.servers[ctx.guild.id].keys(), name, 'ANIME')
+        watchers, title = find_watchers(self.servers[str(ctx.guild.id)].keys(), name, 'ANIME')
         await ctx.send(f"Pinging {title} watchers:")
         for user in watchers:
-            user_id = self.servers[ctx.guild.id][user]
+            user_id = self.servers[str(ctx.guild.id)][user]
             await ctx.send(f"<@{user_id}>")
 
     @commands.command(name='anilist-users', help='Show anilist users on server')
     async def anilistUsers(self, ctx):
         await ctx.send("Anilist users on this server:")
-        for user_anilist, user_id in self.servers[ctx.guild.id]:
+        for user_anilist, user_id in self.servers[str(ctx.guild.id)]:
             await ctx.send(f"[{user_anilist}](https://anilist.co/user/{user_anilist}) - <@{user_id}>")
 
     @commands.command(name='mangaping', help='Ping users who read a manga')
     async def mangaping(self, ctx, *args):
         name = ' '.join(args)
-        watchers, title = find_watchers(self.servers[ctx.guild.id].keys(), name, 'MANGA')
+        watchers, title = find_watchers(self.servers[str(ctx.guild.id)].keys(), name, 'MANGA')
         await ctx.send(f"Pinging {title} readers:")
         for user in watchers:
-            user_id = self.servers[ctx.guild.id][user]
+            user_id = self.servers[str(ctx.guild.id)][user]
             await ctx.send(f"<@{user_id}>")
 
     async def default_username(self, ctx):
