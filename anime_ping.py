@@ -1,5 +1,6 @@
 import requests
 import json
+from util import dict_access, title_access
 
 url = 'https://graphql.anilist.co'
 
@@ -105,9 +106,8 @@ def get_media_id(title, media_type):
     data = response.json()
     if 'errors' in data: return None, None
 
-    media = data['data']['Media']
-    title_text = media['title']['english'] or media['title']['romaji']
-    return media['id'], title_text
+    media = dict_access(data, ['data', 'Media'])
+    return media['id'], title_access(media['title'])
 
 
 def get_user_ids(user_names):
@@ -164,7 +164,7 @@ def check_watch_status(anime_id, user_ids, media_type):
         print("GraphQL Error:", data['errors'])
         return []
 
-    return data['data']['Page']['mediaList']
+    return dict_access(data,['data', 'Page', 'mediaList'])
 
 def find_watchers(target_users, target_media, media_type):
     out = []
@@ -175,7 +175,7 @@ def find_watchers(target_users, target_media, media_type):
             results = check_watch_status(anime_id, user_ids, media_type)
             if results:
                 for entry in results:
-                    out.append(entry['user']['name'])
+                    out.append(dict_access(entry, ['user','name']))
     return out, title
 
 def fetch_user(username):
@@ -189,8 +189,7 @@ def fetch_user(username):
         print(f"API Error: {response.text}")
         return []
     data = response.json()
-    # print(data)
-    return data.get('data').get('User')
+    return dict_access(data, ['data','User'])
 
 def get_media(name, mediatype):
     variables = {
@@ -202,5 +201,4 @@ def get_media(name, mediatype):
         print(f"API Error: {response.text}")
         return []
     data = response.json()
-    # print(data)
-    return data.get('data').get('Media')
+    return dict_access(data, ['data','Media'])

@@ -6,6 +6,7 @@ from collections import defaultdict
 from deranged import deranged_meter
 import datetime
 import re
+from util import dict_access, title_access
 # as per recommendation from @freylis, compile once only
 CLEANR = re.compile('<.*?>')
 
@@ -13,9 +14,9 @@ def cleanhtml(raw_html):
   return re.sub(CLEANR, '', raw_html)
 
 def date_to_unix(date):
-    day = date.get('day') if date.get('day') is not None else 0
-    month = date.get('month') if date.get('month') is not None else 0
-    year = date.get('year') if date.get('year') is not None else 0
+    day = dict_access(date,['day'], 0)
+    month = dict_access(date,['month'], 0)
+    year = dict_access(date,['year'], 0)
     try:
         date_obj = datetime.date(year, month, day)
         datetime_obj = datetime.datetime.combine(date_obj, datetime.time())
@@ -109,34 +110,34 @@ class Anime(commands.Cog):
             title=username,
             url=f"https://anilist.co/user/{username}",
             color=discord.Colour.blurple(),
-            description=f"Created at: <t:{data.get('createdAt')}:d>"
+            description=f"Created at: <t:{dict_access(data,['createdAt'], 0)}:d>"
         )
-        embed.set_thumbnail(url=data.get('avatar').get('medium'))
-        embed.set_image(url=data.get('bannerImage'))
+        embed.set_thumbnail(url=dict_access(data,['avatar','medium']))
+        embed.set_image(url=dict_access(data,['bannerImage']))
 
-        anistats = data.get('statistics').get('anime')
+        anistats = dict_access(data,['statistics','anime'])
         embed.add_field(name="Anime stats", value="", inline=False)
-        embed.add_field(name="Total Anime", value=anistats.get('count'), inline=True)
-        embed.add_field(name="Days Watched", value=round((anistats.get('minutesWatched')/60/24), 2), inline=True)
-        embed.add_field(name="Mean Score", value=anistats.get('meanScore'), inline=True)
+        embed.add_field(name="Total Anime", value=dict_access(anistats,['count']), inline=True)
+        embed.add_field(name="Days Watched", value=round((dict_access(anistats,['minutesWatched'])/60/24), 2), inline=True)
+        embed.add_field(name="Mean Score", value=dict_access(anistats,['meanScore']), inline=True)
 
-        anigenres = anistats.get('genres')
+        anigenres = dict_access(anistats,['genres'])
         embed.add_field(name="Most watched genres", value="", inline=False)
-        embed.add_field(name=anigenres[0].get('genre'), value=anigenres[0].get('count'), inline=True)
-        embed.add_field(name=anigenres[1].get('genre'), value=anigenres[1].get('count'), inline=True)
-        embed.add_field(name=anigenres[2].get('genre'), value=anigenres[2].get('count'), inline=True)
+        embed.add_field(name=dict_access(anigenres[0],['genre']), value=dict_access(anigenres[0],['count']), inline=True)
+        embed.add_field(name=dict_access(anigenres[1],['genre']), value=dict_access(anigenres[1],['count']), inline=True)
+        embed.add_field(name=dict_access(anigenres[2],['genre']), value=dict_access(anigenres[2],['count']), inline=True)
 
-        mangastats = data.get('statistics').get('manga')
+        mangastats = dict_access(data,['statistics','manga'])
         embed.add_field(name="Manga stats", value="", inline=False)
-        embed.add_field(name="Total Manga", value=mangastats.get('count'), inline=True)
-        embed.add_field(name="Chapters Read", value=mangastats.get('chaptersRead'), inline=True)
-        embed.add_field(name="Mean Score", value=mangastats.get('meanScore'), inline=True)
+        embed.add_field(name="Total Manga", value=dict_access(mangastats,['count']), inline=True)
+        embed.add_field(name="Chapters Read", value=dict_access(mangastats,['chaptersRead']), inline=True)
+        embed.add_field(name="Mean Score", value=dict_access(mangastats,['meanScore']), inline=True)
 
-        mangagenres = mangastats.get('genres')
+        mangagenres = dict_access(mangastats,['genres'])
         embed.add_field(name="Most read genres", value="", inline=False)
-        embed.add_field(name=mangagenres[0].get('genre'), value=mangagenres[0].get('count'), inline=True)
-        embed.add_field(name=mangagenres[1].get('genre'), value=mangagenres[1].get('count'), inline=True)
-        embed.add_field(name=mangagenres[2].get('genre'), value=mangagenres[2].get('count'), inline=True)
+        embed.add_field(name=dict_access(mangagenres[0], ['genre']), value=dict_access(mangagenres[0], ['count']),inline=True)
+        embed.add_field(name=dict_access(mangagenres[1], ['genre']), value=dict_access(mangagenres[1], ['count']),inline=True)
+        embed.add_field(name=dict_access(mangagenres[2], ['genre']), value=dict_access(mangagenres[2], ['count']),inline=True)
 
         await ctx.send(embed=embed)
 
@@ -169,23 +170,14 @@ class Anime(commands.Cog):
         data = get_media(media_name, "ANIME")
 
         name = data.get('title')
-        title = ""
-        if name.get('english') is not None:
-            title = name.get('english')
-        elif name.get('romaji') is not None:
-            title = name.get('romaji')
-        elif name.get('native') is not None:
-            title = name.get('native')
+        title = title_access(name)
 
-        cover = data.get('coverImage')
-        color_hex = cover.get('color', '#5865F2')
-        color_hex = color_hex if color_hex is not None else "#5865F2"
+        color_hex = dict_access(data,['coverImage', 'color'], "#5865F2")
         color_dec = int(color_hex[1:], 16)
-        color_dc = discord.Colour(color_dec)
 
         embed = discord.Embed(
             title=title,
-            color=color_dc,
+            color=discord.Colour(color_dec),
         )
 
         if data.get('season') is not None:
@@ -201,7 +193,7 @@ class Anime(commands.Cog):
         embed.add_field(name="Description", value=cleanhtml(data.get('description'))[:1023], inline=False)
         embed.add_field(name="", value=f"[AniList page]({data.get('siteUrl')})", inline=False)
 
-        embed.set_image(url=cover.get('large'))
+        embed.set_image(url=dict_access(data,['coverImage', 'large']))
         await ctx.send(embed=embed)
 
     @commands.command(name='manga', help="Show manga details")
@@ -210,23 +202,14 @@ class Anime(commands.Cog):
         data = get_media(media_name, "MANGA")
 
         name = data.get('title')
-        title = ""
-        if name.get('english') is not None:
-            title = name.get('english')
-        elif name.get('romaji') is not None:
-            title = name.get('romaji')
-        elif name.get('native') is not None:
-            title = name.get('native')
+        title = title_access(name)
 
-        cover = data.get('coverImage')
-        color_hex = cover.get('color', '#5865F2')
-        color_hex = color_hex if color_hex is not None else "#5865F2"
+        color_hex = dict_access(data, ['coverImage', 'color'], "#5865F2")
         color_dec = int(color_hex[1:], 16)
-        color_dc = discord.Colour(color_dec)
 
         embed = discord.Embed(
             title=title,
-            color=color_dc,
+            color=discord.Colour(color_dec),
         )
 
         start_timestamp = date_to_unix(data.get('startDate'))
@@ -243,5 +226,5 @@ class Anime(commands.Cog):
         embed.add_field(name="Description", value=cleanhtml(data.get('description'))[:1023], inline=False)
         embed.add_field(name="", value=f"[AniList page]({data.get('siteUrl')})", inline=False)
 
-        embed.set_image(url=cover.get('large'))
+        embed.set_image(url=dict_access(data,['coverImage', 'large']))
         await ctx.send(embed=embed)
