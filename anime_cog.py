@@ -71,7 +71,8 @@ class Anime(commands.Cog):
     @commands.command(name='anilist-users', help='Show anilist users on server')
     async def anilistUsers(self, ctx):
         await ctx.send("Anilist users on this server:")
-        for user_anilist, user_id in self.servers[str(ctx.guild.id)]:
+        print(self.servers[str(ctx.guild.id)])
+        for user_anilist, user_id in self.servers[str(ctx.guild.id)].items():
             await ctx.send(f"[{user_anilist}](https://anilist.co/user/{user_anilist}) - <@{user_id}>")
 
     @commands.command(name='mangaping', help='Ping users who read a manga')
