@@ -73,7 +73,7 @@ class Anime(commands.Cog):
         await ctx.send("Anilist users on this server:")
         print(self.servers[str(ctx.guild.id)])
         for user_anilist, user_id in self.servers[str(ctx.guild.id)].items():
-            await ctx.send(f"[{user_anilist}](https://anilist.co/user/{user_anilist}) - <@{user_id}>")
+            await ctx.send(f"{user_anilist} - <@{user_id}>")
 
     @commands.command(name='mangaping', help='Ping users who read a manga')
     async def mangaping(self, ctx, *args):
