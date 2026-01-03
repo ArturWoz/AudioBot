@@ -95,6 +95,10 @@ query Media($search: String, $type: MediaType) {
       month
       year
     }
+    nextAiringEpisode {
+      airingAt
+      episode
+    }
   }
 }
 '''

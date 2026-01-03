@@ -168,7 +168,6 @@ class Anime(commands.Cog):
     async def anime(self, ctx, *args):
         media_name = ' '.join(args)
         data = get_media(media_name, "ANIME")
-
         name = data.get('title')
         title = title_access(name)
 
@@ -182,14 +181,27 @@ class Anime(commands.Cog):
 
         if data.get('season') is not None:
             embed.add_field(name="Season", value=f"{data.get('season')} {data.get('seasonYear')}", inline=True)
+        embed.add_field(name="Genres", value=f"{', '.join(data.get('genres'))}", inline=True)
+
         if data.get('status') == 'FINISHED':
-            if data.get('episodes') is not None and data.get('episodes') > 1:
-                embed.add_field(name="Length", value=f"{data.get('duration')}min x {data.get('episodes')} episodes", inline=True)
-            else:
-                embed.add_field(name="Length", value=f"{data.get('duration')}min", inline=True)
+            val = f"{data.get('duration')}min"
+            eps = data.get('episodes')
+            if eps is not None:
+                if eps > 1:
+                    val = val + f" x {eps} episodes"
+            embed.add_field(name="Length", value=val, inline=True)
         else:
-            embed.add_field(name="Status", value=data.get('status').replace('_', ' ').capitalize(), inline=True)
-        embed.add_field(name="Genres", value=f"{' '.join(data.get('genres'))}", inline=True)
+            next_ep = data.get('nextAiringEpisode')
+            if next_ep is not None:
+                embed_name = f"Next episode ({next_ep.get('episode')}"
+                eps = data.get('episodes')
+                if eps is not None:
+                    if eps > 1:
+                        embed_name = embed_name + f"/{eps}"
+                embed.add_field(name=embed_name + ")", value=f"<t:{next_ep.get('airingAt')}:R>")
+            else:
+                embed.add_field(name="Status", value=data.get('status').replace('_', ' ').capitalize(), inline=True)
+
         embed.add_field(name="Description", value=cleanhtml(data.get('description'))[:1023], inline=False)
         embed.add_field(name="", value=f"[AniList page]({data.get('siteUrl')})", inline=False)
 
@@ -220,9 +232,10 @@ class Anime(commands.Cog):
             if data.get('status') == 'FINISHED':
                 end_timestamp = date_to_unix(data.get('endDate'))
                 embed.add_field(name="End Date", value=f"<t:{end_timestamp}:d>", inline=True)
-                embed.add_field(name="Length", value=f"{data.get('volumes')} volumes, {data.get('chapters')} chapters", inline=False)
+                embed.add_field(name="Length", value=f"{data.get('volumes')} volumes, {data.get('chapters')} chapters", inline=True)
 
-        embed.add_field(name="Genres", value=f"{' '.join(data.get('genres'))}", inline=False)
+        embed.add_field(name="Genres", value=f"{' '.join(data.get('genres'))}", inline=True)
+
         embed.add_field(name="Description", value=cleanhtml(data.get('description'))[:1023], inline=False)
         embed.add_field(name="", value=f"[AniList page]({data.get('siteUrl')})", inline=False)
 
