@@ -4,7 +4,8 @@ def dict_access(dictionary, keys, default=None):
         current = current[key]
         if current is None:
             return default
-        return current
+    return current
+
 
 def title_access(name):
     title = ""
