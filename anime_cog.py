@@ -162,7 +162,7 @@ class Anime(commands.Cog):
 
         toplist = ""
         for anime in top:
-            toplist = toplist + f"{anime[0]}: {anime[1]} \n"
+            toplist = toplist + f"[{anime[0]}]({anime[2]}): {anime[1]} \n"
 
         embed.add_field(name="Most deranged anime:", value=toplist, inline=False)
 

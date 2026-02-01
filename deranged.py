@@ -26,6 +26,7 @@ query ($name: String, $page: Int, $perPage: Int) { # Define which variables will
                     {
                         romaji
                     }
+                  siteUrl
                 }
             }
         }
@@ -127,7 +128,7 @@ query ($name: String, $page: Int, $perPage: Int) { # Define which variables will
                 anime_score += partial_scores[2]
             except:
                 pass
-            deranged_list.append((element["media"]["title"]["romaji"], round(anime_score,2)))
+            deranged_list.append((element["media"]["title"]["romaji"], round(anime_score,2), element["media"]["siteUrl"]))
             # if anime_score > derangest[0]:
             #     derangest = [round(anime_score,2), element["media"]["title"]["romaji"]]
             deranged += anime_score
