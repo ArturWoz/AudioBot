@@ -95,8 +95,9 @@ query ($name: String, $page: Int, $perPage: Int) { # Define which variables will
     deranged = 0
     count = 0
     nextPage = True
-    derangest = [0, ""] #score, name, user
+    # derangest = [0, ""] #score, name, user
     avatar = ""
+    deranged_list = []
     while nextPage:
         response = requests.post(url, json={'query': query, 'variables': variables})
 
@@ -126,11 +127,15 @@ query ($name: String, $page: Int, $perPage: Int) { # Define which variables will
                 anime_score += partial_scores[2]
             except:
                 pass
-            if anime_score > derangest[0]:
-                derangest = [round(anime_score,2), element["media"]["title"]["romaji"]]
+            deranged_list.append((element["media"]["title"]["romaji"], round(anime_score,2)))
+            # if anime_score > derangest[0]:
+            #     derangest = [round(anime_score,2), element["media"]["title"]["romaji"]]
             deranged += anime_score
             count += 1
             #print(element["media"]["title"]["romaji"] + " " + str(anime_score))
         nextPage = response.json()["data"]["Page"]["pageInfo"]["hasNextPage"]
         variables["page"] += 1
-    return [round(deranged,2), round(deranged/count, 2), derangest, avatar]
+    deranged_list = list(set(deranged_list)) #remove duplicates
+    deranged_list.sort(key=lambda tup: -tup[1])
+    top = deranged_list[:5]
+    return [round(deranged,2), round(deranged/count, 2), top, avatar]

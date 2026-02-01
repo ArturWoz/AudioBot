@@ -148,7 +148,7 @@ class Anime(commands.Cog):
         if username is None:
             return
 
-        abso, rel, worst, avatar = deranged_meter(username)
+        abso, rel, top, avatar = deranged_meter(username)
 
         embed = discord.Embed(
             title=username + "'s deranged meter",
@@ -156,9 +156,15 @@ class Anime(commands.Cog):
         )
 
         embed.set_thumbnail(url=avatar)
-        embed.add_field(name="Absolute deranged meter:", value=abso, inline=True)
         embed.add_field(name="Relative deranged meter:", value=rel, inline=True)
-        embed.add_field(name="The most deranged anime:", value=f"{worst[1]} - {worst[0]}", inline=True)
+        embed.add_field(name="Absolute deranged meter:", value=abso, inline=True)
+        # embed.add_field(name="The most deranged anime:", value=f"{worst[1]} - {worst[0]}", inline=True)
+
+        toplist = ""
+        for anime in top:
+            toplist = toplist + f"{anime[0]}: {anime[1]} \n"
+
+        embed.add_field(name="Most deranged anime:", value=toplist, inline=False)
 
         embed.add_field(name="", value=f"[User's AniList page](https://anilist.co/user/{username})", inline=False)
 
